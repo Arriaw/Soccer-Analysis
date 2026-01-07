@@ -5,6 +5,7 @@ import pickle
 import cv2
 import sys
 import numpy as np
+import pandas as pd
 sys.path.append('../')
 from utils import get_center_of_bbox, get_bbox_width
 
@@ -33,9 +34,9 @@ class Tracker:
         cls_names_inv = {v:k for k, v in cls_names.items()} 
 
         tracks = {
-            "players":[],
-            "referees":[],
-            "ball":[]
+            "players": [],
+            "referees": [],
+            "ball": []
         }
 
         for frame, detection in enumerate(detections):
@@ -131,8 +132,8 @@ class Tracker:
 
         triangle_points = np.array([
             [x, y],
-            [x-10, y-20],
-            [x+10, y-20]
+            [x-8, y-18],
+            [x+8, y-18]
         ])
 
         cv2.drawContours(frame, [triangle_points], 0, color, cv2.FILLED)
@@ -165,3 +166,12 @@ class Tracker:
             output_video_frames.append(frame)
 
         return output_video_frames
+    
+    def ball_interpolation(self, ball_pos):
+        ball_pos = [x.get(1, {}).get("bbox", []) for x in ball_pos]
+
+        df_ball_pos = pd.DataFrame(ball_pos, columns=['x1', 'y1', 'x2', 'y2'])
+        df_ball_pos = df_ball_pos.interpolate(limit_direction='both')
+
+        ball_pos = [{1: {"bbox": x }} for x in df_ball_pos.to_numpy().tolist()]
+        return ball_pos
