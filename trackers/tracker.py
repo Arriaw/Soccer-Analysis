@@ -141,7 +141,25 @@ class Tracker:
 
         return frame
 
-    def draw_annotation(self, frames, tracks):
+    def draw_team_ball_possession(self, frame, frame_num, team_ball_possession):
+        overlay = frame.copy()
+        cv2.rectangle(overlay, (1350, 850), (1900, 970), (255, 255, 255), cv2.FILLED)
+        alpha = 0.4
+        cv2.addWeighted(overlay, alpha, frame, 1 - alpha, 0, frame)
+
+        team_ball_possession_till_now = team_ball_possession[:frame_num+1]
+        team1_frames = team_ball_possession_till_now[team_ball_possession_till_now==0].shape[0]
+        team2_frames = team_ball_possession_till_now[team_ball_possession_till_now==1].shape[0]
+
+        team1 = team1_frames / (team1_frames + team2_frames)
+        team2 = team2_frames / (team1_frames + team2_frames)
+
+        cv2.putText(frame, f"Team 1 Ball Possession: {team1*100:.2f}%", (1375, 900), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
+        cv2.putText(frame, f"Team 2 Ball Possession: {team2*100:.2f}%", (1375, 950), cv2.FONT_HERSHEY_SIMPLEX, 1, (0,0,0), 3)
+
+        return frame
+
+    def draw_annotation(self, frames, tracks, team_ball_possession):
         output_video_frames= []
         for frame_num, frame in enumerate(frames):
             frame = frame.copy()
@@ -158,7 +176,6 @@ class Tracker:
                 if player.get('has_ball', False):
                     frame = self.draw_triangle(frame, player["bbox"], (0,0,255))
 
-
             # Draw Referee
             for track_id, referee in referee_dict.items():
                 frame = self.draw_ellipse(frame, referee["bbox"], (0,255,255))
@@ -166,6 +183,10 @@ class Tracker:
             # Draw Ball
             for _, ball in ball_dict.items():
                 frame = self.draw_triangle(frame, ball["bbox"], (0,255,0))
+
+
+            # Draw Team Ball Possession
+            frame = self.draw_team_ball_possession(frame, frame_num, team_ball_possession)
 
             output_video_frames.append(frame)
 
