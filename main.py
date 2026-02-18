@@ -6,6 +6,7 @@ from player_ball_assigner import PlayerBallAssigner
 import numpy as np
 from camera_movements import CameraMovementEstimator
 from view_transformer import ViewTransformer
+from speed_and_distance_estimator import SpeedAndDistanceEstimator
 
 def main():
     # Read Video
@@ -33,6 +34,12 @@ def main():
 
     # Interpoalte Ball
     tracks['ball'] = tracker.ball_interpolation(tracks['ball'])
+
+
+    # Speed And Distance Covered
+    speedAndDistanceEstimator = SpeedAndDistanceEstimator()
+    speedAndDistanceEstimator.add_speed_and_distance_to_tracks(tracks)
+
 
     # # Save cropped image of a player
     # for track_id, player in tracks['players'][0].items():
@@ -77,6 +84,9 @@ def main():
 
     ## Draw camera movement
     output_video_frames = cameraMovementEstimator.draw_camera_movement(output_video_frames, camera_movement_per_frame)
+
+    ## Draw Speed and Distance
+    output_video_frames = speedAndDistanceEstimator.draw_speed_and_distance(output_video_frames, tracks)
 
     # Save Video
     save_video(output_video_frames, 'output_videos/output_video.avi')
