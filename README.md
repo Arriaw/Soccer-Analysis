@@ -15,6 +15,8 @@ The project leverages YOLO object detection, clustering algorithms, optical flow
 
 - Movement analysis in real-world (meter) scale
 
+![Screenshot](output_videos/Screenshot.png)
+
 ## Core Technologies & Modules
 ### YOLO – Object Detection
 
